@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.jjportal.entites.Role;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,5 +21,6 @@ public class UserDTO {
 	private String password;
 	private Set<Role> roles = new HashSet<>();
 	private AddressDTO address;
-	 
+	private CartDTO cart;
 }
+
