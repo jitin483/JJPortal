@@ -35,9 +35,11 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 	    http
-	        .cors() // ✅ Enable CORS handling
-	        .and()
 	        .csrf().disable()
+	        .cors()
+	        .and()
+	        .formLogin().disable()  // ⛔ Prevents default login redirect (302)
+	        .httpBasic().disable()
 	        .authorizeHttpRequests()
 	            .requestMatchers(AppConstants.PUBLIC_URLS).permitAll()
 	            .requestMatchers(AppConstants.USER_URLS).hasAnyAuthority("USER", "ADMIN")
@@ -45,8 +47,10 @@ public class SecurityConfig {
 	            .anyRequest().authenticated()
 	        .and()
 	        .exceptionHandling()
-	            .authenticationEntryPoint((request, response, authException) ->
-	                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized"))
+	            .authenticationEntryPoint((request, response, authException) -> {
+	                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+	                response.getWriter().write("Unauthorized");
+	            })
 	        .and()
 	        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 

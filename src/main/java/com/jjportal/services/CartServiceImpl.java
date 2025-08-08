@@ -5,12 +5,12 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import com.jjportal.entites.Cart;
 import com.jjportal.entites.CartItem;
 import com.jjportal.entites.Product;
+import com.jjportal.entites.User;
 import com.jjportal.exceptions.APIException;
 import com.jjportal.exceptions.ResourceNotFoundException;
 import com.jjportal.payloads.CartDTO;
@@ -18,6 +18,7 @@ import com.jjportal.payloads.ProductDTO;
 import com.jjportal.repositories.CartItemRepo;
 import com.jjportal.repositories.CartRepo;
 import com.jjportal.repositories.ProductRepo;
+import com.jjportal.repositories.UserRepo;
 
 import jakarta.transaction.Transactional;
 
@@ -36,7 +37,31 @@ public class CartServiceImpl implements CartService {
 
 	@Autowired
 	private ModelMapper modelMapper;
+	
+	@Autowired
+	private UserRepo userRepo;
 
+	
+	@Override
+	public CartDTO createCart(String emailId) {
+	    User user = userRepo.findByEmail(emailId)
+	        .orElseThrow(() -> new ResourceNotFoundException("User", "email", emailId));
+
+	    // Optional: Check if user already has a cart
+	    if (userRepo.existsById(user.getUserId())) {
+	        throw new IllegalStateException("Cart already exists for this user.");
+	    }
+
+	    Cart cart = new Cart();
+	    cart.setUser(user);
+	    
+
+	    Cart savedCart = cartRepo.save(cart);
+
+	    return modelMapper.map(savedCart, CartDTO.class);  // Or use ModelMapper
+	}
+
+	
 	@Override
 	public CartDTO addProductToCart(Long cartId, Long productId, Integer quantity) {
 

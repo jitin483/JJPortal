@@ -16,4 +16,6 @@ public interface UserService {
 	String deleteUser(Long userId);
 
 	UserDTO updateUserAddress(Long userId, AddressDTO addressDTO);
+
+	UserDTO getUserByEmail(String email);
 }

@@ -54,39 +54,74 @@ public class ProductServiceImpl implements ProductService {
 	private String path;
 
 	@Override
-	public ProductDTO addProduct(Long categoryId, Product product) {
+	public ProductDTO addProduct(Long categoryId, Product product, MultipartFile image) throws IOException  {
 
-		Category category = categoryRepo.findById(categoryId)
-				.orElseThrow(() -> new ResourceNotFoundException("Category", "categoryId", categoryId));
+	    Category category = categoryRepo.findById(categoryId)
+	            .orElseThrow(() -> new ResourceNotFoundException("Category", "categoryId", categoryId));
 
-		boolean isProductNotPresent = true;
+	    boolean isProductNotPresent = true;
 
-		List<Product> products = category.getProducts();
+	    List<Product> products = category.getProducts();
 
-		for (int i = 0; i < products.size(); i++) {
-			if (products.get(i).getProductName().equals(product.getProductName())
-					&& products.get(i).getDescription().equals(product.getDescription())) {
+	    for (Product existingProduct : products) {
+	        if (existingProduct.getProductName().equals(product.getProductName()) &&
+	            existingProduct.getDescription().equals(product.getDescription())) {
+	            isProductNotPresent = false;
+	            break;
+	        }
+	    }
 
-				isProductNotPresent = false;
-				break;
-			}
-		}
+	    if (isProductNotPresent) {
+	        product.setCategory(category);
 
-		if (isProductNotPresent) {
-			product.setImage("default.png");
+	        double specialPrice = product.getPrice() - ((product.getDiscount() * 0.01) * product.getPrice());
+	        product.setSpecialPrice(specialPrice);
 
-			product.setCategory(category);
+	        // ✅ Use FileService to upload the image
+	        if (image != null && !image.isEmpty()) {
+	           // String uploadDir = "images"; // Or load from application.properties
+	            String fileName = fileService.uploadImage(path, image);
+	            product.setImage(fileName);
+	        } else {
+	            product.setImage("default.png");
+	        }
 
-			double specialPrice = product.getPrice() - ((product.getDiscount() * 0.01) * product.getPrice());
-			product.setSpecialPrice(specialPrice);
+	        Product savedProduct = productRepo.save(product);
+	        return modelMapper.map(savedProduct, ProductDTO.class);
 
-			Product savedProduct = productRepo.save(product);
-
-			return modelMapper.map(savedProduct, ProductDTO.class);
-		} else {
-			throw new APIException("Product already exists !!!");
-		}
+	    } else {
+	        throw new APIException("Product already exists !!!");
+	    }
 	}
+
+	/*
+	 * @Override public ProductDTO addProduct(Long categoryId, Product product) {
+	 * 
+	 * Category category = categoryRepo.findById(categoryId) .orElseThrow(() -> new
+	 * ResourceNotFoundException("Category", "categoryId", categoryId));
+	 * 
+	 * boolean isProductNotPresent = true;
+	 * 
+	 * List<Product> products = category.getProducts();
+	 * 
+	 * for (int i = 0; i < products.size(); i++) { if
+	 * (products.get(i).getProductName().equals(product.getProductName()) &&
+	 * products.get(i).getDescription().equals(product.getDescription())) {
+	 * 
+	 * isProductNotPresent = false; break; } }
+	 * 
+	 * if (isProductNotPresent) { product.setImage("default.png");
+	 * 
+	 * product.setCategory(category);
+	 * 
+	 * double specialPrice = product.getPrice() - ((product.getDiscount() * 0.01) *
+	 * product.getPrice()); product.setSpecialPrice(specialPrice);
+	 * 
+	 * Product savedProduct = productRepo.save(product);
+	 * 
+	 * return modelMapper.map(savedProduct, ProductDTO.class); } else { throw new
+	 * APIException("Product already exists !!!"); } }
+	 */
 
 	@Override
 	public ProductResponse getAllProducts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {

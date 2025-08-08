@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,13 +34,26 @@ public class ProductController {
 	@Autowired
 	private ProductService productService;
 
+	
 	@PostMapping("/admin/categories/{categoryId}/product")
-	public ResponseEntity<ProductDTO> addProduct(@Valid @RequestBody Product product, @PathVariable Long categoryId) {
+	public ResponseEntity<ProductDTO> addProduct(
+	        @RequestPart("product") @Valid Product product,
+	        @RequestPart(value = "image", required = false) MultipartFile image,
+	        @PathVariable Long categoryId) throws IOException {
 
-		ProductDTO savedProduct = productService.addProduct(categoryId, product);
-
-		return new ResponseEntity<ProductDTO>(savedProduct, HttpStatus.CREATED);
+	    ProductDTO savedProduct = productService.addProduct(categoryId, product, image);
+	    return new ResponseEntity<>(savedProduct, HttpStatus.CREATED);
 	}
+
+	/*
+	 * @PostMapping("/admin/categories/{categoryId}/product") public
+	 * ResponseEntity<ProductDTO> addProduct(@Valid @RequestBody Product
+	 * product, @PathVariable Long categoryId) {
+	 * 
+	 * ProductDTO savedProduct = productService.addProduct(categoryId, product);
+	 * 
+	 * return new ResponseEntity<ProductDTO>(savedProduct, HttpStatus.CREATED); }
+	 */
 
 	@GetMapping("/public/products")
 	public ResponseEntity<ProductResponse> getAllProducts(
@@ -50,7 +64,7 @@ public class ProductController {
 
 		ProductResponse productResponse = productService.getAllProducts(pageNumber, pageSize, sortBy, sortOrder);
 
-		return new ResponseEntity<ProductResponse>(productResponse, HttpStatus.FOUND);
+		return new ResponseEntity<ProductResponse>(productResponse, HttpStatus.OK);
 	}
 
 	@GetMapping("/public/categories/{categoryId}/products")
@@ -97,7 +111,7 @@ public class ProductController {
 	@DeleteMapping("/admin/products/{productId}")
 	public ResponseEntity<String> deleteProductByCategory(@PathVariable Long productId) {
 		String status = productService.deleteProduct(productId);
-
+		
 		return new ResponseEntity<String>(status, HttpStatus.OK);
 	}
 

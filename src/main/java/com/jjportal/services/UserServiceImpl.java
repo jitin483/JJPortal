@@ -175,6 +175,23 @@ public class UserServiceImpl implements UserService {
 	    return userDTO;
 	}
 
+	
+	@Override
+	public UserDTO getUserByEmail(String email) {
+	    User user = userRepo.findByEmail(email)
+	            .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+
+	    UserDTO userDTO = modelMapper.map(user, UserDTO.class);
+
+	    // Only map address if at least one exists
+	    
+	    user.getAddresses().stream().findFirst().ifPresent(address -> {
+	        AddressDTO addressDTO = modelMapper.map(address, AddressDTO.class);
+	        userDTO.setAddress(addressDTO);
+	    });
+
+	    return userDTO;
+	}
 	@Override
 	public UserDTO updateUser(Long userId, UserDTO userDTO) {
 		User user = userRepo.findById(userId)

@@ -1,5 +1,6 @@
 package com.jjportal.controllers;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,13 +13,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.jjportal.config.AppConstants;
 import com.jjportal.entites.Category;
 import com.jjportal.payloads.CategoryDTO;
 import com.jjportal.payloads.CategoryResponse;
 import com.jjportal.services.CategoryService;
-
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 
@@ -29,10 +28,10 @@ public class CategoryController {
 
 	@Autowired
 	private CategoryService categoryService;
-
+	
 	@PostMapping("/admin/category")
 	public ResponseEntity<CategoryDTO> createCategory(@Valid @RequestBody Category category) {
-		CategoryDTO savedCategoryDTO = categoryService.createCategory(category);
+		 CategoryDTO savedCategoryDTO = categoryService.createCategory(category);
 
 		return new ResponseEntity<CategoryDTO>(savedCategoryDTO, HttpStatus.CREATED);
 	}
@@ -44,12 +43,23 @@ public class CategoryController {
 			@RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_CATEGORIES_BY, required = false) String sortBy,
 			@RequestParam(name = "sortOrder", defaultValue = AppConstants.SORT_DIR, required = false) String sortOrder) {
 		
+		
 		CategoryResponse categoryResponse = categoryService.getCategories(pageNumber, pageSize, sortBy, sortOrder);
+		
+		return new ResponseEntity<CategoryResponse>(categoryResponse, HttpStatus.OK);
+	}
+	
+	@GetMapping("/admin/category/{categoryId}")
+	public ResponseEntity<CategoryDTO> getCategory(@PathVariable Long categoryId) {
+		CategoryDTO categoryDTO = categoryService.getCategory(categoryId);
 
-		return new ResponseEntity<CategoryResponse>(categoryResponse, HttpStatus.FOUND);
+		return new ResponseEntity<CategoryDTO>(categoryDTO, HttpStatus.OK);
 	}
 
-	@PutMapping("/admin/categories/{categoryId}")
+	
+
+
+	@PutMapping("/admin/category/{categoryId}")
 	public ResponseEntity<CategoryDTO> updateCategory(@RequestBody Category category,
 			@PathVariable Long categoryId) {
 		CategoryDTO categoryDTO = categoryService.updateCategory(category, categoryId);
@@ -57,7 +67,7 @@ public class CategoryController {
 		return new ResponseEntity<CategoryDTO>(categoryDTO, HttpStatus.OK);
 	}
 
-	@DeleteMapping("/admin/categories/{categoryId}")
+	@DeleteMapping("/admin/category/{categoryId}")
 	public ResponseEntity<String> deleteCategory(@PathVariable Long categoryId) {
 		String status = categoryService.deleteCategory(categoryId);
 

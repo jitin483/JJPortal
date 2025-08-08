@@ -105,4 +105,22 @@ public class CategoryServiceImpl implements CategoryService {
 		return "Category with categoryId: " + categoryId + " deleted successfully !!!";
 	}
 
+	@Override
+	public CategoryDTO getCategory(Long categoryId) {
+		Category savedCategory = categoryRepo.findById(categoryId)
+				.orElseThrow(() -> new ResourceNotFoundException("Category", "categoryId", categoryId));
+
+		return modelMapper.map(savedCategory, CategoryDTO.class);
+	}
+	
+	public List<CategoryDTO> getAllCategories() {
+	    List<Category> categories = categoryRepo.findAll();
+
+	    return categories.stream()
+	            .map(cat -> modelMapper.map(cat, CategoryDTO.class))
+	            .collect(Collectors.toList());
+	}
+
+
+
 }

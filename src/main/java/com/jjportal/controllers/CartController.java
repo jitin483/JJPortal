@@ -26,6 +26,12 @@ public class CartController {
 	@Autowired
 	private CartService cartService;
 
+	@PostMapping("/public/users/{emailId}/carts")
+	public ResponseEntity<CartDTO> createCart(@PathVariable String emailId) {
+	    CartDTO cartDTO = cartService.createCart(emailId);
+	    return new ResponseEntity<CartDTO>(cartDTO, HttpStatus.CREATED);
+	}
+
 	
 	@PostMapping("/public/carts/{cartId}/products/{productId}/quantity/{quantity}")
 	public ResponseEntity<CartDTO> addProductToCart(@PathVariable Long cartId, @PathVariable Long productId, @PathVariable Integer quantity) {

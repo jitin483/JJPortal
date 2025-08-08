@@ -10,7 +10,7 @@ import com.jjportal.payloads.ProductResponse;
 
 public interface ProductService {
 
-	ProductDTO addProduct(Long categoryId, Product product);
+	ProductDTO addProduct(Long categoryId, Product product, MultipartFile image) throws IOException;
 
 	ProductResponse getAllProducts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
 
